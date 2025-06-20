@@ -10,7 +10,7 @@ def get_db_connection():
         user=config.DB_USER,
         password=config.DB_PASSWORD,
         database=config.DB_NAME,
-        cursorclass=pymysql.cursors.Cursor
+        cursorclass=pymysql.cursors.DictCursor  # So output is JSON serializable
     )
 
 @app.route('/', methods=['GET', 'POST'])
