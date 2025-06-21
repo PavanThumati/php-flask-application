@@ -31,13 +31,13 @@ phases:
   build:
     commands:
       - echo "Building and tagging frontend..."
-      - cd Application-Code/frontend
+      - cd web-tier/
       - docker build -t ${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} .
       - docker tag ${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
       - cd -
 
       - echo "Building and tagging backend..."
-      - cd Application-Code/backend
+      - cd app-tier/
       - docker build -t ${BACKEND_IMAGE_REPO}:${IMAGE_TAG} .
       - docker tag ${BACKEND_IMAGE_REPO}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}
       - cd -
@@ -45,7 +45,7 @@ phases:
   post_build:
     commands:
       - echo "Updating DB Host Endpoint"
-       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" backend/config.py
+       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
        
       - echo "Pushing frontend image..."
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
