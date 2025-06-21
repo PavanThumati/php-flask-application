@@ -25,7 +25,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
       - echo Fetching RDS endpoint...
-      - export RDS_ENDPOINT=$(aws rds describe-db-instances --query "DBInstances[?DBName=='mydb'].Endpoint.Address" --output text --region $AWS_REGION)
+      - export RDS_ENDPOINT=$(aws rds describe-db-instances --query "DBInstances[?DBName=='three-tier-rds-instance'].Endpoint.Address" --output text --region $AWS_REGION)
       - echo RDS_ENDPOINT=$RDS_ENDPOINT
 
   build:
