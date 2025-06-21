@@ -4,7 +4,6 @@ env:
   variables:
     DB_USERNAME: admin
     DB_PASSWORD: adminadmin
-    CLUSTER_NAME: eks-cluster
     AWS_REGION: us-east-1
     AWS_ACCOUNT_ID: 047719630685
     BACKEND_IMAGE_REPO: backend-image
