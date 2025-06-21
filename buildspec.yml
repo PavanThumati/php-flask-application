@@ -6,8 +6,8 @@ env:
     DB_PASSWORD: adminadmin
     AWS_REGION: us-east-1
     AWS_ACCOUNT_ID: 047719630685
-    BACKEND_IMAGE_REPO: backend-image
-    FRONTEND_IMAGE_REPO: frontend-image
+    BACKEND_IMAGE_REPO: backend
+    FRONTEND_IMAGE_REPO: frontend
 
 phases:
   install:
