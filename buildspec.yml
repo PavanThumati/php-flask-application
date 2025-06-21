@@ -44,6 +44,9 @@ phases:
 
   post_build:
     commands:
+      - echo "Updating DB Host Endpoint"
+       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
+       
       - echo "Pushing frontend image..."
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
 
