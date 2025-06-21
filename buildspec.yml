@@ -7,8 +7,8 @@ env:
     CLUSTER_NAME: eks-cluster
     AWS_REGION: us-east-1
     AWS_ACCOUNT_ID: 047719630685
-    BACKEND_IMAGE_REPO: app-tier-image
-    FRONTEND_IMAGE_REPO: web-toer-image
+    BACKEND_IMAGE_REPO: backend-image
+    FRONTEND_IMAGE_REPO: frontend-image
 
 phases:
   install:
@@ -45,7 +45,7 @@ phases:
   post_build:
     commands:
       - echo "Updating DB Host Endpoint"
-       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
+       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" backend/config.py
        
       - echo "Pushing frontend image..."
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
@@ -56,9 +56,9 @@ phases:
       - echo "Updating Kubernetes manifest files with image URIs..."
       - mkdir -p k8s-out
       
-      - sed "s|IMAGE_URI_FRONTEND|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}|g" Kubernetes-Manifests-file/frontend-deployment.yaml > k8s-out/frontend-deployment.yaml
+      - sed "s|IMAGE_URI_FRONTEND|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}|g" Kubernetes-Manifests-file/php-deployment.yaml > k8s-out/frontend-deployment.yaml
      
-      - sed "s|IMAGE_URI_BACKEND|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}|g" Kubernetes-Manifests-file/backend-deployment.yaml > k8s-out/backend-deployment.yaml
+      - sed "s|IMAGE_URI_BACKEND|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}|g" Kubernetes-Manifests-file/flask-deployment.yaml > k8s-out/backend-deployment.yaml
       
 artifacts:
   base-directory: k8s-out
