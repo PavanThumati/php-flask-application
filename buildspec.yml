@@ -28,6 +28,9 @@ phases:
 
   build:
     commands:
+       - echo "Updating DB Host Endpoint"
+      - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
+      
       - echo "Building and tagging frontend..."
       - cd web-tier/
       - docker build -t ${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} .
@@ -42,9 +45,6 @@ phases:
 
   post_build:
     commands:
-      - echo "Updating DB Host Endpoint"
-      - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
-
       - echo "Pushing frontend image..."
       - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
 
