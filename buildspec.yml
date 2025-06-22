@@ -18,6 +18,12 @@ phases:
       - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
       - echo "Image tag is $IMAGE_TAG"
       - echo "Pavanteja@12pavan" | docker login -u "pavanthumati" --password-stdin
+      - echo Installing utilities...
+      - yum install -y jq
+      - echo Installing SonarScanner CLI...
+      - curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+      - unzip -q sonar-scanner.zip
+      - export PATH=$PATH:$(pwd)/sonar-scanner-4.8.0.2856-linux/bin
 
   pre_build:
     commands:
@@ -31,6 +37,10 @@ phases:
     commands:
       - echo "Updating DB Host Endpoint"
       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
+      - echo Running SonarQube analysis...
+      - cd app-tier
+      - sonar-scanner -Dsonar.projectKey=indian -Dsonar.sources=. -Dsonar.host.url=http://184.72.206.70 -Dsonar.login=sqp_84c96ded5db9b13c01ab9d3f5bba6e4c934e6601
+      - cd -
       
       - echo "Building and tagging frontend..."
       - cd web-tier/
