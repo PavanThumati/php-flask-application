@@ -64,3 +64,4 @@ artifacts:
   files:
     - frontend-deployment.yaml
     - backend-deployment.yaml
+    - deployspec.yml
