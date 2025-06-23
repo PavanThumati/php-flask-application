@@ -14,16 +14,19 @@ phases:
   install:
     commands:
       - echo Installing utilities...
-      - apt install -y jq
+      - apt-get update && apt-get install -y jq unzip curl
+
       - echo Installing SonarScanner CLI...
       - curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
       - unzip -q sonar-scanner.zip
-      - export PATH=$PATH:$(pwd)/sonar-scanner-4.8.0.2856-linux/bi
-      
+      - export PATH="$PATH:$(pwd)/sonar-scanner-4.8.0.2856-linux/bin"
+      - which sonar-scanner
+
       - echo "Installing dependencies..."
       - export AWS_SDK_LOAD_CONFIG=1
       - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
       - echo "Image tag is $IMAGE_TAG"
+
       - echo "Logging in to Docker Hub..."
       - echo "Pavanteja@12pavan" | docker login -u "pavanthumati" --password-stdin
 
@@ -31,6 +34,7 @@ phases:
     commands:
       - echo "Logging in to Amazon ECR..."
       - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
       - echo "Fetching RDS endpoint..."
       - export RDS_ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier "$DB_INSTANCE_ID" --query "DBInstances[0].Endpoint.Address" --output text --region "$AWS_REGION")
       - echo "RDS_ENDPOINT=$RDS_ENDPOINT"
@@ -39,7 +43,6 @@ phases:
     commands:
       - echo Running SonarQube analysis...
       - cd app-tier/
-      - echo "Running SonarQube Scanner..."
       - sonar-scanner \
           -Dsonar.projectKey=Project \
           -Dsonar.sources=. \
@@ -47,7 +50,6 @@ phases:
           -Dsonar.login=sqp_03cfcd28b35649e574d6f6b0c8f1bc7575bfc7dd
       - cd -
 
-      
       - echo "Updating DB Host Endpoint..."
       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
 
