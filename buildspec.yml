@@ -14,7 +14,7 @@ phases:
   install:
     commands:
       - echo Installing utilities...
-      - apt-get update && apt-get install -y jq unzip curl
+      - yum update -y && yum install -y jq unzip curl
 
       - echo Installing SonarScanner CLI...
       - curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
