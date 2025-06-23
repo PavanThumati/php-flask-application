@@ -17,40 +17,48 @@ phases:
       - export AWS_SDK_LOAD_CONFIG=1
       - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
       - echo "Image tag is $IMAGE_TAG"
+      - echo "Logging in to Docker Hub..."
       - echo "Pavanteja@12pavan" | docker login -u "pavanthumati" --password-stdin
 
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-      - echo Fetching RDS endpoint...
-      - export RDS_ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier "$DB_INSTANCE_ID" --query "DBInstances[0].Endpoint.Address" --output text --region $AWS_REGION)
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+      - echo "Fetching RDS endpoint..."
+      - export RDS_ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier "$DB_INSTANCE_ID" --query "DBInstances[0].Endpoint.Address" --output text --region "$AWS_REGION")
       - echo "RDS_ENDPOINT=$RDS_ENDPOINT"
 
   build:
     commands:
-      - echo "Updating DB Host Endpoint"
+      - echo "Running SonarQube Scanner..."
+      - sonar-scanner \
+          -Dsonar.projectKey=Project \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=http://3.81.33.149 \
+          -Dsonar.login=sqp_03cfcd28b35649e574d6f6b0c8f1bc7575bfc7dd
+
+      - echo "Updating DB Host Endpoint..."
       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
-  
+
       - echo "Building and tagging frontend..."
       - cd web-tier/
-      - docker build -t ${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} .
-      - docker tag ${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
+      - docker build -t "${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}" .
+      - docker tag "${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}"
       - cd -
 
       - echo "Building and tagging backend..."
       - cd app-tier/
-      - docker build -t ${BACKEND_IMAGE_REPO}:${IMAGE_TAG} .
-      - docker tag ${BACKEND_IMAGE_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}
+      - docker build -t "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" .
+      - docker tag "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}"
       - cd -
 
   post_build:
     commands:
       - echo "Pushing frontend image..."
-      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}
+      - docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}"
 
       - echo "Pushing backend image..."
-      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}
+      - docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}"
 
       - echo "Updating Kubernetes manifest files with image URIs..."
       - mkdir -p k8s-out
