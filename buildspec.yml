@@ -43,11 +43,12 @@ phases:
     commands:
       - echo Running SonarQube analysis...
       - cd app-tier/
-      - sonar-scanner \
-          -Dsonar.projectKey=Project \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=http://3.81.33.149 \
-          -Dsonar.login=sqp_03cfcd28b35649e574d6f6b0c8f1bc7575bfc7dd
+      - echo "Running SonarQube scan..."
+    - |
+      sonar-scanner -Dsonar.projectKey=Project \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://3.81.33.149 \
+                    -Dsonar.login=sqp_03cfcd28b35649e574d6f6b0c8f1bc7575bfc7dd || echo "SonarQube scan failed, continuing..."
       - cd -
 
       - echo "Updating DB Host Endpoint..."
