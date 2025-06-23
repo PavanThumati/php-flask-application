@@ -65,12 +65,6 @@ phases:
       - docker tag "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}"
       - cd -
 
-      - echo Installing Trivy...
-      - wget https://github.com/aquasecurity/trivy/releases/download/v0.63.0/trivy_0.63.0_Linux-64bit.tar.gz
-      - tar -xzf trivy_0.63.0_Linux-64bit.tar.gz
-      - mv trivy /usr/local/bin/
-      - trivy --version
-
   post_build:
     commands:
       - echo "Pushing frontend image..."
