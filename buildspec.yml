@@ -13,6 +13,13 @@ env:
 phases:
   install:
     commands:
+      - echo Installing utilities...
+      - yum install -y jq
+      - echo Installing SonarScanner CLI...
+      - curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+      - unzip -q sonar-scanner.zip
+      - export PATH=$PATH:$(pwd)/sonar-scanner-4.8.0.2856-linux/bi
+      
       - echo "Installing dependencies..."
       - export AWS_SDK_LOAD_CONFIG=1
       - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
@@ -30,13 +37,17 @@ phases:
 
   build:
     commands:
+      - echo Running SonarQube analysis...
+      - cd app-tier/
       - echo "Running SonarQube Scanner..."
       - sonar-scanner \
           -Dsonar.projectKey=Project \
           -Dsonar.sources=. \
           -Dsonar.host.url=http://3.81.33.149 \
           -Dsonar.login=sqp_03cfcd28b35649e574d6f6b0c8f1bc7575bfc7dd
+      - cd -
 
+      
       - echo "Updating DB Host Endpoint..."
       - sed -i "s|DBHOST|$RDS_ENDPOINT|g" app-tier/config.py
 
