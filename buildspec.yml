@@ -72,10 +72,11 @@ phases:
       - docker build -t "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" .
       - docker tag "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}"
       - cd -
+      
       - mkdir -p trivy-reports
-      - trivy image --severity HIGH,CRITICAL --exit-code 0 --format table -o trivy-reports/fronted-report.txt ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} || true
+      - trivy image --severity HIGH,CRITICAL --exit-code 0 --format table -o trivy-reports/frontend-report.txt ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} || true
       - trivy image --severity HIGH,CRITICAL --exit-code 0 --format table -o trivy-reports/backend-report.txt ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG} || true
-      - cd -
+      
 
   post_build:
     commands:
