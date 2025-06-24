@@ -66,11 +66,15 @@ phases:
       - docker build -t "${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}" .
       - docker tag "${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG}"
       - cd -
-
+      
       - echo "Building and tagging backend..."
       - cd app-tier/
       - docker build -t "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" .
       - docker tag "${BACKEND_IMAGE_REPO}:${IMAGE_TAG}" "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}"
+      - cd -
+      - mkdir -p trivy-reports
+      - trivy image --severity HIGH,CRITICAL --exit-code 0 --format table -o trivy-reports/report.txt ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_IMAGE_REPO}:${IMAGE_TAG} || true
+      - trivy image --severity HIGH,CRITICAL --exit-code 0 --format table -o trivy-reports/report.txt ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG} || true
       - cd -
 
   post_build:
@@ -89,7 +93,8 @@ phases:
       - sed "s|IMAGE_URI_BACKEND|${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_IMAGE_REPO}:${IMAGE_TAG}|g" k8s/flask-deployment.yaml > k8s-out/backend-deployment.yaml
 
 artifacts:
-  base-directory: k8s-out
   files:
-    - frontend-deployment.yaml
-    - backend-deployment.yaml
+    - k8s-out/frontend-deployment.yaml
+    - k8s-out/backend-deployment.yaml
+    - trivy-reports/*
+  discard-paths: yes
